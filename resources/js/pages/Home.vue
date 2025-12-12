@@ -4,11 +4,7 @@
     <UApp>
         <Header />
 
-        <UMain>
-            <NuxtLayout>
-                <NuxtPage />
-            </NuxtLayout>
-        </UMain>
+        <UMain> </UMain>
 
         <UFooter />
     </UApp>
