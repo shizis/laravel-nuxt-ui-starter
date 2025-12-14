@@ -6,105 +6,148 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Spinner } from '@/components/ui/spinner';
-import AuthBase from '@/layouts/AuthLayout.vue';
 import { register } from '@/routes';
 import { store } from '@/routes/login';
 import { request } from '@/routes/password';
-import { Form, Head } from '@inertiajs/vue3';
+import { Form, Head, useForm } from '@inertiajs/vue3';
+import { FormError } from '@nuxt/ui';
 
 defineProps<{
     status?: string;
     canResetPassword: boolean;
     canRegister: boolean;
 }>();
+
+const state = useForm({
+    email: '',
+    password: '',
+});
+
+type Schema = typeof state;
+
+function validate(state: Partial<Schema>): FormError[] {
+    const errors = [];
+    if (!state.email) errors.push({ name: 'email', message: 'Required' });
+    if (!state.password) errors.push({ name: 'password', message: 'Required' });
+    return errors;
+}
+
+const submit = () => {
+    state.submit(store());
+};
 </script>
 
 <template>
-    <AuthBase
-        title="Log in to your account"
-        description="Enter your email and password below to log in"
-    >
-        <Head title="Log in" />
+    <Head title="Log in" />
 
-        <div
-            v-if="status"
-            class="mb-4 text-center text-sm font-medium text-green-600"
-        >
-            {{ status }}
-        </div>
+    <UApp>
+        <Header />
+        <UContainer>
+            <UForm
+                :validate="validate"
+                :state="state"
+                class="space-y-4"
+                @submit="submit"
+            >
+                <UFormField label="Email" name="email">
+                    <UInput v-model="state.email" />
+                </UFormField>
 
-        <Form
-            v-bind="store.form()"
-            :reset-on-success="['password']"
-            v-slot="{ errors, processing }"
-            class="flex flex-col gap-6"
-        >
-            <div class="grid gap-6">
-                <div class="grid gap-2">
-                    <Label for="email">Email address</Label>
-                    <Input
-                        id="email"
-                        type="email"
-                        name="email"
-                        required
-                        autofocus
-                        :tabindex="1"
-                        autocomplete="email"
-                        placeholder="email@example.com"
-                    />
-                    <InputError :message="errors.email" />
-                </div>
-
-                <div class="grid gap-2">
-                    <div class="flex items-center justify-between">
-                        <Label for="password">Password</Label>
-                        <TextLink
-                            v-if="canResetPassword"
-                            :href="request()"
-                            class="text-sm"
-                            :tabindex="5"
-                        >
-                            Forgot password?
-                        </TextLink>
-                    </div>
-                    <Input
-                        id="password"
-                        type="password"
-                        name="password"
-                        required
-                        :tabindex="2"
-                        autocomplete="current-password"
-                        placeholder="Password"
-                    />
-                    <InputError :message="errors.password" />
-                </div>
-
-                <div class="flex items-center justify-between">
-                    <Label for="remember" class="flex items-center space-x-3">
-                        <Checkbox id="remember" name="remember" :tabindex="3" />
-                        <span>Remember me</span>
-                    </Label>
-                </div>
-
-                <Button
-                    type="submit"
-                    class="mt-4 w-full"
-                    :tabindex="4"
-                    :disabled="processing"
-                    data-test="login-button"
-                >
-                    <Spinner v-if="processing" />
-                    Log in
-                </Button>
-            </div>
+                <UFormField label="Password" name="password">
+                    <UInput v-model="state.password" type="password" />
+                </UFormField>
+                <UButton type="submit"> Submit </UButton>
+            </UForm>
 
             <div
-                class="text-center text-sm text-muted-foreground"
-                v-if="canRegister"
+                v-if="status"
+                class="mb-4 text-center text-sm font-medium text-green-600"
             >
-                Don't have an account?
-                <TextLink :href="register()" :tabindex="5">Sign up</TextLink>
+                {{ status }}
             </div>
-        </Form>
-    </AuthBase>
+
+            <Form
+                v-bind="store.form()"
+                :reset-on-success="['password']"
+                v-slot="{ errors, processing }"
+                class="flex flex-col gap-6"
+            >
+                <div class="grid gap-6">
+                    <div class="grid gap-2">
+                        <Label for="email">Email address</Label>
+                        <Input
+                            id="email"
+                            type="email"
+                            name="email"
+                            required
+                            autofocus
+                            :tabindex="1"
+                            autocomplete="email"
+                            placeholder="email@example.com"
+                        />
+                        <InputError :message="errors.email" />
+                    </div>
+
+                    <div class="grid gap-2">
+                        <div class="flex items-center justify-between">
+                            <Label for="password">Password</Label>
+                            <TextLink
+                                v-if="canResetPassword"
+                                :href="request()"
+                                class="text-sm"
+                                :tabindex="5"
+                            >
+                                Forgot password?
+                            </TextLink>
+                        </div>
+                        <Input
+                            id="password"
+                            type="password"
+                            name="password"
+                            required
+                            :tabindex="2"
+                            autocomplete="current-password"
+                            placeholder="Password"
+                        />
+                        <InputError :message="errors.password" />
+                    </div>
+
+                    <div class="flex items-center justify-between">
+                        <Label
+                            for="remember"
+                            class="flex items-center space-x-3"
+                        >
+                            <Checkbox
+                                id="remember"
+                                name="remember"
+                                :tabindex="3"
+                            />
+                            <span>Remember me</span>
+                        </Label>
+                    </div>
+
+                    <Button
+                        type="submit"
+                        class="mt-4 w-full"
+                        :tabindex="4"
+                        :disabled="processing"
+                        data-test="login-button"
+                    >
+                        <Spinner v-if="processing" />
+                        Log in
+                    </Button>
+                </div>
+
+                <div
+                    class="text-center text-sm text-muted-foreground"
+                    v-if="canRegister"
+                >
+                    Don't have an account?
+                    <TextLink :href="register()" :tabindex="5"
+                        >Sign up</TextLink
+                    >
+                </div>
+            </Form>
+        </UContainer>
+    </UApp>
 </template>

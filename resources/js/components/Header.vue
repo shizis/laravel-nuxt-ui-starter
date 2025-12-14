@@ -26,7 +26,7 @@ const items = computed<NavigationMenuItem[]>(() => [
 </script>
 
 <template>
-    <UHeader>
+    <UHeader mode="drawer">
         <template #title>
             <AppLogo class="h-6 w-auto" />
         </template>
@@ -46,6 +46,14 @@ const items = computed<NavigationMenuItem[]>(() => [
                     aria-label="GitHub"
                 />
             </UTooltip>
+        </template>
+
+        <template #body>
+            <UNavigationMenu
+                :items="items"
+                orientation="vertical"
+                class="-mx-2.5"
+            />
         </template>
     </UHeader>
 </template>
